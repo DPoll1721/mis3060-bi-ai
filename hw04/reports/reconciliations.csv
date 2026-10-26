@@ -1,0 +1,13 @@
+stage,reconciliation,rows_compared,mismatches,match_rate,note
+raw,R1 fact_fees.amount = aum_basis x bps / 10000 / 12,122197,0,1.0,tolerance $0.02
+raw,R2 fact_fees.aum_basis = fact_portfolio_snapshot.aum,122197,0,1.0,joined on client_id + date (all are the 1st of the month); tolerance $0.01
+raw,R3 snapshot.active_alpha_ytd = return_ytd - benchmark_return_ytd,129547,300,0.997684,tolerance 0.0001
+raw,R4 Buy/Sell amount = shares x price,143311,836,0.994167,tolerance $0.01
+raw,R5 Advisory Fee txns = fact_fees (client-month),28746,28745,3.5e-05,"known limitation F8; 93451 fee months with no txn, 1933 txn months with no fee"
+raw,R6 dim_client.risk_profile consistent with snapshot benchmark,2500,75,0.97,"benchmark 1 = (Mod.) Aggressive, 3 = Balanced, 8 = (Mod.) Conservative"
+clean,R1 fact_fees.amount = aum_basis x bps / 10000 / 12,122197,0,1.0,tolerance $0.02
+clean,R2 fact_fees.aum_basis = fact_portfolio_snapshot.aum,122197,0,1.0,joined on client_id + date (all are the 1st of the month); tolerance $0.01
+clean,R3 snapshot.active_alpha_ytd = return_ytd - benchmark_return_ytd,129547,0,1.0,tolerance 0.0001
+clean,R4 Buy/Sell amount = shares x price,143218,0,1.0,tolerance $0.01
+clean,R5 Advisory Fee txns = fact_fees (client-month),28746,28745,3.5e-05,"known limitation F8; 93451 fee months with no txn, 1909 txn months with no fee"
+clean,R6 dim_client.risk_profile consistent with snapshot benchmark,2500,0,1.0,"benchmark 1 = (Mod.) Aggressive, 3 = Balanced, 8 = (Mod.) Conservative"

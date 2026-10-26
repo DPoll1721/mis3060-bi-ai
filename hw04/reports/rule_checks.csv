@@ -1,0 +1,91 @@
+stage,table,rule,applicable_rows,fail_rows,pass_rate
+raw,dim_advisor,"years_experience in [0, 50]",25,0,1.0
+raw,dim_advisor,aum_target_mm > 0,25,0,1.0
+raw,dim_advisor,region in allowed list,25,0,1.0
+raw,dim_client,"age in [18, 110]",2525,0,1.0
+raw,dim_client,initial_aum > 0,2525,0,1.0
+raw,dim_client,state is USPS code,2525,78,0.969109
+raw,dim_client,risk_profile in allowed list,2525,76,0.969901
+raw,dim_client,client_tier in allowed list,2525,0,1.0
+raw,dim_client,primary_account_type in allowed list,2525,0,1.0
+raw,dim_client,is_active is True/False,2525,0,1.0
+raw,dim_client,zip_code is 5 digits,2525,0,1.0
+raw,dim_client,client_tier matches initial_aum band,2525,0,1.0
+raw,dim_client,active client has a snapshot in the last month (D4),2349,24,0.989783
+raw,dim_date,year/month/quarter match date,1827,0,1.0
+raw,dim_date,is_month_end matches date,1827,0,1.0
+raw,dim_date,is_month_end is 0/1,1827,0,1.0
+raw,dim_date,is_quarter_end is 0/1,1827,0,1.0
+raw,dim_date,is_year_end is 0/1,1827,0,1.0
+raw,dim_date,is_trading_day is 0/1,1827,0,1.0
+raw,dim_date,is_trading_day = weekday and not a market holiday,1827,14,0.992337
+raw,dim_security,asset_class in allowed list,500,0,1.0
+raw,dim_security,is_etf is True/False,500,0,1.0
+raw,dim_security,"ETF expense_ratio_bps in (0, 300]",219,0,1.0
+raw,dim_security,stock has no expense ratio,281,0,1.0
+raw,dim_security,"stock has sector, ETF has none",500,0,1.0
+raw,dim_benchmark,ticker_proxy not blank,8,0,1.0
+raw,fact_fees,aum_basis > 0,122197,0,1.0
+raw,fact_fees,"bps_charged in (0, 200]",122197,0,1.0
+raw,fact_fees,amount >= 0,122197,0,1.0
+raw,fact_fees,fee_type in allowed list,122197,0,1.0
+raw,fact_fees,advisor_id = client's advisor (dim_client),122197,0,1.0
+raw,fact_portfolio_snapshot,aum > 0,129547,0,1.0
+raw,fact_portfolio_snapshot,return_ytd >= -100% (cannot lose more than everything),129547,300,0.997684
+raw,fact_portfolio_snapshot,"benchmark_return_ytd in [-100%, 100%]",129547,0,1.0
+raw,fact_portfolio_snapshot,"cash_pct in [0, 1]",129547,0,1.0
+raw,fact_portfolio_snapshot,year/month match snapshot_date,129547,0,1.0
+raw,fact_portfolio_snapshot,account_type in allowed list,129547,0,1.0
+raw,fact_portfolio_snapshot,advisor_id = client's advisor (dim_client),129547,0,1.0
+raw,fact_portfolio_snapshot,account_type = client's primary_account_type,129547,0,1.0
+raw,fact_transactions,txn_type in allowed list,298772,0,1.0
+raw,fact_transactions,sign rule: shares > 0 on trades,197175,836,0.99576
+raw,fact_transactions,price > 0 on trades,197175,0,1.0
+raw,fact_transactions,sign rule: amount > 0,298772,0,1.0
+raw,fact_transactions,"cash rows have no security, shares or price",101597,0,1.0
+raw,fact_transactions,advisor_id = client's advisor (dim_client),298572,0,1.0
+clean,dim_advisor,"years_experience in [0, 50]",25,0,1.0
+clean,dim_advisor,aum_target_mm > 0,25,0,1.0
+clean,dim_advisor,region in allowed list,25,0,1.0
+clean,dim_client,"age in [18, 110]",2500,0,1.0
+clean,dim_client,initial_aum > 0,2500,0,1.0
+clean,dim_client,state is USPS code,2500,0,1.0
+clean,dim_client,risk_profile in allowed list,2500,0,1.0
+clean,dim_client,client_tier in allowed list,2500,0,1.0
+clean,dim_client,primary_account_type in allowed list,2500,0,1.0
+clean,dim_client,is_active is True/False,2500,0,1.0
+clean,dim_client,zip_code is 5 digits,2500,0,1.0
+clean,dim_client,client_tier matches initial_aum band,2500,0,1.0
+clean,dim_client,active client has a snapshot in the last month (D4),2325,0,1.0
+clean,dim_date,year/month/quarter match date,1827,0,1.0
+clean,dim_date,is_month_end matches date,1827,0,1.0
+clean,dim_date,is_month_end is 0/1,1827,0,1.0
+clean,dim_date,is_quarter_end is 0/1,1827,0,1.0
+clean,dim_date,is_year_end is 0/1,1827,0,1.0
+clean,dim_date,is_trading_day is 0/1,1827,0,1.0
+clean,dim_date,is_trading_day = weekday and not a market holiday,1827,0,1.0
+clean,dim_security,asset_class in allowed list,500,0,1.0
+clean,dim_security,is_etf is True/False,500,0,1.0
+clean,dim_security,"ETF expense_ratio_bps in (0, 300]",219,0,1.0
+clean,dim_security,stock has no expense ratio,281,0,1.0
+clean,dim_security,"stock has sector, ETF has none",500,0,1.0
+clean,dim_benchmark,ticker_proxy not blank,8,0,1.0
+clean,fact_fees,aum_basis > 0,122197,0,1.0
+clean,fact_fees,"bps_charged in (0, 200]",122197,0,1.0
+clean,fact_fees,amount >= 0,122197,0,1.0
+clean,fact_fees,fee_type in allowed list,122197,0,1.0
+clean,fact_fees,advisor_id = client's advisor (dim_client),122197,0,1.0
+clean,fact_portfolio_snapshot,aum > 0,129547,0,1.0
+clean,fact_portfolio_snapshot,return_ytd >= -100% (cannot lose more than everything),129547,0,1.0
+clean,fact_portfolio_snapshot,"benchmark_return_ytd in [-100%, 100%]",129547,0,1.0
+clean,fact_portfolio_snapshot,"cash_pct in [0, 1]",129547,0,1.0
+clean,fact_portfolio_snapshot,year/month match snapshot_date,129547,0,1.0
+clean,fact_portfolio_snapshot,account_type in allowed list,129547,0,1.0
+clean,fact_portfolio_snapshot,advisor_id = client's advisor (dim_client),129547,0,1.0
+clean,fact_portfolio_snapshot,account_type = client's primary_account_type,129547,0,1.0
+clean,fact_transactions,txn_type in allowed list,298572,0,1.0
+clean,fact_transactions,sign rule: shares > 0 on trades,197044,0,1.0
+clean,fact_transactions,price > 0 on trades,197044,0,1.0
+clean,fact_transactions,sign rule: amount > 0,298572,0,1.0
+clean,fact_transactions,"cash rows have no security, shares or price",101528,0,1.0
+clean,fact_transactions,advisor_id = client's advisor (dim_client),298572,0,1.0

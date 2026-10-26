@@ -91,3 +91,20 @@ Claude Code flagged 13 issues (no wrong results on current data; mainly asserts 
 - #11 `.round(6)`: "%" values have at most 2 decimals, so no precision is lost.
 - #12 Orphan check only on fact_transactions.client_id: every other FK is checked in 03_validate.py (Part D).
 - #13 Hard-coded expected counts: intentional, since they make the asserts stronger; each one matches a decision-log entry.
+
+## Part D - 03_validate.py
+Claude Code flagged 14 issues (no crashes; mainly inflated or double-counted pass rates and missing checks).
+
+**Fixed**
+- #1 Conditional rules counted out-of-scope rows as passes: each rule now returns an applies-mask and pass rates divide by applicable rows only.
+- #2 The '45.0' security_id defect was penalized 3 times: removed the duplicate "security_id is an integer" rule; it is now measured by type validity and RI only (raw fact_transactions rule pass 88.95% -> 99.94%).
+- #3 Added the D4 check the decision log promised: active clients without a last-month snapshot = 24 raw, 0 clean.
+- #4 R1 and R4 now count unparseable values as mismatches.
+- #6/#7 Added cross-table rules (fact advisor_id = client's advisor; snapshot account_type = client's), date-part checks, ETF/stock expense-ratio both directions, cash rows have no security/shares/price; added R6 (risk_profile vs benchmark: 75 raw -> 0 clean, re-verifies the D3 fill).
+- #8 Final asserts now require clean data to pass every rule, R1-R4 and R6, and 100% on completeness/uniqueness/type/rule pass.
+- #11/#12/#13/#14 Divide-by-zero guards; corrected R2 note; IQR on transaction amount now uses Buy/Sell only; RI function now reports duplicate parent keys.
+
+**Left as is**
+- #5 Flag columns are not re-validated here: 02_clean.py already asserts each flag's exact count.
+- #9 Uniqueness uses keep="first" on purpose: it counts the 25 extra copies that must be removed (99.01% raw).
+- #10 The tier rule now only applies where initial_aum parses, so NaN can't be assigned UHNW.
