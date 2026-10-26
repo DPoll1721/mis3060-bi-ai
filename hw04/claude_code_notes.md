@@ -73,3 +73,21 @@ What I did:
 **Left as is (no effect on current data)**
 - Whitespace, non-ISO dates, NaN handling, duplicate-key crash risks, empty tables, global FINDINGS list: verified the raw data has no whitespace, all dates are ISO, and the PK/grain checks pass, so none of these change a count today.
 - Hard-coded thresholds (1000 placeholder, 500K/5M tier bands, tolerances, 95% type threshold) are kept as business rules and will be listed in the README.md.
+
+## Part C - 02_clean.py
+Claude Code flagged 13 issues (no wrong results on current data; mainly asserts that would not catch a failure).
+
+**Fixed**
+- #1/#2 Flag asserts could never fail: now assert the exact flag counts from the decision log (41,725 / 2,410 / 420 / 386 / 1,282).
+- #3 F6: now asserts every txn_date exists in dim_date (a missing date would have silently got flag 0).
+- #4/#5 D1: now asserts the last name differs by exactly one final letter, the other 7 attributes are identical to the original, and the removed IDs are exactly 2501-2525.
+- #6 F3: replaced `.fillna(0) >= 0` with checks that only the sign changed, blanks stayed blank, and all non-blank shares are numeric.
+- #7 D9: removed a tautological assert; kept the `== 14` check.
+- #8 D3: now asserts every client has exactly one benchmark before filling risk_profile.
+- #10 F3: tightened the reconciliation from 1% to $0.01 (actual max gap is $0.005).
+
+**Left as is**
+- #9 Minimum evidence for the benchmark map: the `== "Balanced"` assert and the 757/757 evidence in the decision log already cover it.
+- #11 `.round(6)`: "%" values have at most 2 decimals, so no precision is lost.
+- #12 Orphan check only on fact_transactions.client_id: every other FK is checked in 03_validate.py (Part D).
+- #13 Hard-coded expected counts: intentional, since they make the asserts stronger; each one matches a decision-log entry.

@@ -14,11 +14,11 @@ Evidence comes from `reports/dq_summary_raw.csv` (01_profile.py) plus targeted c
 ## Dimension tables
 
 ### D1. dim_client — duplicate clients (IDs 2501–2525)
-- **Evidence:** 25 clients (50 rows counting both copies) match another client on first_name, age, city, zip_code and initial_aum. Last name is truncated in the copy (e.g. 2501 "Taylo" vs 674 "Taylor"). Checked the other 7 attributes (state, risk_profile, tier, account type, client_since, advisor, is_active): 0 differences. None of the 25 IDs appear in any fact table.
+- **Evidence:** 25 clients (50 rows counting both copies) match another client on first_name, age, city, zip_code and initial_aum. Last name differs in the final letter: 23 are truncated (e.g. 2501 "Taylo" vs 674 "Taylor") and 2 have an extra letter ("Leen"/"Lee", "Pacen"/"Pace"). Checked the other 7 attributes (state, risk_profile, tier, account type, client_since, advisor, is_active): 0 differences. None of the 25 IDs appear in any fact table.
 - **Dimension:** Uniqueness, Accuracy
 - **Decision:** Quarantine IDs 2501–2525 → `quarantine_dim_client_duplicates.csv` (with the ID of the original they duplicate).
 - **Justification:** Same person under two IDs inflates the client count (2,525 vs the true 2,500) and splits activity. The originals have the correct full name, and no facts point to the copies, so removing them loses nothing.
-- **Risk:** If two real, different people share name, age, city, zip and AUM to the cent, we'd remove a real client. Very unlikely, and the truncated last names point to a data-entry copy.
+- **Risk:** If two real, different people share name, age, city, zip and AUM to the cent, we'd remove a real client. Very unlikely, and the one-letter last-name differences point to a data-entry copy.
 
 ### D2. dim_client.state — full state names
 - **Evidence:** 78 rows use full names instead of 2-letter codes: Pennsylvania 25, Florida 15, New York 14, New Jersey 13, California 5, Illinois 4, Texas 2. The other 2,447 use USPS codes.

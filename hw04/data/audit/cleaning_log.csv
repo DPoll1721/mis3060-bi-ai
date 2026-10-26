@@ -1,0 +1,23 @@
+table,issue,action,rows_affected,note
+fact_transactions,F1 security_id stored as '45.0',convert to integer text,197175,RI match 0.0% -> 100.0%
+fact_portfolio_snapshot,F9 return_ytd stored as '9.28%',strip % and divide by 100,300,max |return - bench - alpha| after fix = 0.000050
+dim_client,D2 full state names,standardize to USPS codes,78,"invalid before 78, after 0"
+dim_client,D1 duplicate clients,quarantine,25,"rows 2,525 -> 2,500"
+dim_client,D3 blank risk_profile,fill from snapshot benchmark + flag,75,"blanks before 75, after 0"
+dim_date,D9 market holidays marked as trading days,set is_trading_day = 0,14,"New Year, July 4, Christmas (observed)"
+fact_transactions,F2 orphan client_id,quarantine,200,"200 distinct IDs; rows 298,772 -> 298,572"
+fact_transactions,F3 negative shares on Buy,absolute value (amount reconciles),835,"negatives before 835, after 0"
+fact_transactions,F6 Buy/Sell on non-trading day,flag,41725,
+fact_transactions,F7 txn after account close,flag,2410,all for inactive clients: True
+fact_portfolio_snapshot,F10 AUM placeholder 1000.00,flag,420,
+fact_fees,F10 fee on AUM placeholder 1000.00,flag,386,
+fact_portfolio_snapshot,F11 |return_ytd| or |alpha| > 100%,flag,1282,
+dim_client,D4 is_active=True with no Dec-2024 snapshot,leave as is,0,resolved by D1 (all 24 were duplicate IDs)
+dim_client,D5 zip_code leading zeros,leave as is,0,kept as text; BI must load as Text
+dim_advisor,D6 certifications = 'None',leave as is,0,legitimate value: no certifications
+dim_security,D7 blank sector (ETFs) / expense_ratio (stocks),leave as is,0,legitimate structure
+dim_security,"D8 same name, different ticker",leave as is,0,different products
+fact_transactions,F4 blank security/shares/price on cash rows,leave as is,0,legitimate structure
+fact_transactions,F5 Dividend amount = position value,leave as is,0,no data to recompute; documented limitation
+fact_transactions,F8 Advisory Fee txns vs fact_fees,leave as is,0,fact_fees is source of truth; documented
+fact_fees,F12 bps_charged 100.38,leave as is,0,"within Retail range, amount reconciles"
