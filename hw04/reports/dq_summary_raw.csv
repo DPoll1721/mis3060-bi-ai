@@ -1,0 +1,164 @@
+table,check_group,check,column,severity,rows_affected,total_rows,pct_affected,example,note
+dim_client,1 Column,allowed values,state,ERROR,78,2525,3.089,Pennsylvania; Florida; New York; New Jersey; California,
+dim_client,2 Single-table,"near-duplicates on ['first_name', 'age', 'city', 'zip_code', 'initial_aum']","first_name,age,city,zip_code,initial_aum",ERROR,50,2525,1.98,"99, Terri, Jacobson, 358583.01 | 155, Todd, Cooper, 384129.9 | 560, Matthew, Cervantes, 331606.56 | 566, Laura, Frazier, 25212613.34",Same person under two IDs
+fact_portfolio_snapshot,1 Column,type = decimal,return_ytd,ERROR,300,129547,0.232,9.28%; 19.52%; 13.35%; 4.04%; -3.18%,
+fact_portfolio_snapshot,2 Single-table,return stored as '%' string,return_ytd,ERROR,300,129547,0.232,"42, 9.28% | 59, 19.52% | 879, 13.35%",
+fact_transactions,1 Column,type = integer,security_id,ERROR,197175,298772,65.995,45.0; 174.0; 478.0; 406.0; 484.0,
+fact_transactions,2 Single-table,negative shares,shares,ERROR,836,298772,0.28,"272, Buy, -261.9719, 441.71, 115715.61 | 812, Buy, -338.0946, 397.85, 134510.94 | 815, Buy, -360.8407, 243.46, 87850.28",By txn_type: {'Buy': 836}
+fact_transactions,3 Referential,client_id -> dim_client.client_id,client_id,ERROR,200,298772,0.067,3191; 3017; 3058; 2974; 3131,200 distinct orphan keys; 0 blank keys
+fact_transactions,3 Referential,security_id -> dim_security.security_id,security_id,ERROR,197175,197175,100.0,45.0; 174.0; 478.0; 406.0; 484.0,500 distinct orphan keys; 101597 blank keys
+dim_client,4 Cross-table,blank risk_profile with a snapshot benchmark (recoverable?),risk_profile,WARN,75,2525,2.97,,benchmark of those clients: {'3': 75}
+dim_client,4 Cross-table,is_active=True but no snapshot on 2024-12-01,is_active,WARN,24,2525,0.95,,
+dim_client,4 Cross-table,client has no fact rows at all,client_id,WARN,25,2525,0.99,,
+dim_date,2 Single-table,market holiday marked as trading day,is_trading_day,WARN,14,1827,0.766,2020-01-01; 2020-07-03; 2020-12-25; 2021-01-01; 2021-07-05,"Checks New Year, July 4, Christmas (observed)"
+fact_fees,1 Column,"range [0, 100]",bps_charged,WARN,1,122197,0.001,100.38,
+fact_fees,4 Cross-table,fee charged on 1000.00 placeholder AUM,aum_basis,WARN,386,122197,0.316,,
+fact_portfolio_snapshot,1 Column,"range [1000.01, None]",aum,WARN,420,129547,0.324,1000.0,
+fact_portfolio_snapshot,1 Column,"range [-1, 1]",return_ytd,WARN,976,129547,0.753,2.872312; 2.946391; 2.885055; 4.832845; 4.820771,
+fact_portfolio_snapshot,1 Column,"range [-1, 1]",active_alpha_ytd,WARN,1176,129547,0.908,-1.060513; -1.019249; -1.023899; 3.036473; 3.093713,
+fact_portfolio_snapshot,2 Single-table,aum exactly 1000.00 (suspected floor/placeholder),aum,WARN,420,129547,0.324,"29, 2021-02-01, 1000.0 | 29, 2021-03-01, 1000.0 | 33, 2023-02-01, 1000.0",92 clients
+fact_transactions,1 Column,"range [0, None]",shares,WARN,836,298772,0.28,-411.3807; -261.9719; -338.0946; -360.8407; -237.4548,
+fact_transactions,2 Single-table,Dividend amount equals full position value (shares x price),amount,WARN,53864,298772,18.028,,A dividend is normally a small % of position value
+fact_transactions,4 Cross-table,txn after client's last snapshot month (account closed?),txn_date,WARN,2410,298772,0.807,,131 clients; is_active of these: {'False': 2410}
+fact_transactions,4 Cross-table,Buy/Sell on a non-trading day (dim_date),txn_date,WARN,40649,298772,13.605,,
+fact_transactions,4 Cross-table,Buy/Sell on a market holiday (missed by dim_date),txn_date,WARN,1095,298772,0.367,,
+fact_transactions,4 Cross-table,Advisory Fee debits = fact_fees amount (client-month),amount,WARN,28745,28746,99.997,,28746 client-months present in both tables
+dim_advisor,1 Column,null-like text literal,certifications,INFO,6,25,24.0,None,Default read_csv would convert this to NaN
+dim_client,1 Column,blank values,risk_profile,INFO,76,2525,3.01,,Check whether blanks are a defect or legitimate structure
+dim_security,1 Column,blank values,sector,INFO,219,500,43.8,,Check whether blanks are a defect or legitimate structure
+dim_security,1 Column,blank values,expense_ratio_bps,INFO,281,500,56.2,,Check whether blanks are a defect or legitimate structure
+dim_security,2 Single-table,"same name, different ticker",name,INFO,6,500,1.2,"38, OLAB, Jones Inc Fund | 62, YXPS, Jones Inc Fund | 317, RONV, Davis PLC Fund",Different tickers/asset classes - likely different funds
+fact_transactions,1 Column,blank values,security_id,INFO,101597,298772,34.005,,Check whether blanks are a defect or legitimate structure
+fact_transactions,1 Column,blank values,shares,INFO,101597,298772,34.005,,Check whether blanks are a defect or legitimate structure
+fact_transactions,1 Column,blank values,price,INFO,101597,298772,34.005,,Check whether blanks are a defect or legitimate structure
+fact_transactions,2 Single-table,cash rows (Deposit/Withdrawal/Fee) have blank security,security_id,INFO,101597,298772,34.005,,Legitimate structure: cash movements have no security
+dim_advisor,1 Column,key uniqueness,advisor_id,PASS,0,25,0.0,,
+dim_advisor,1 Column,type = integer,advisor_id,PASS,0,25,0.0,,
+dim_advisor,1 Column,type = integer,years_experience,PASS,0,25,0.0,,
+dim_advisor,1 Column,type = integer,aum_target_mm,PASS,0,25,0.0,,
+dim_advisor,1 Column,allowed values,region,PASS,0,25,0.0,,
+dim_advisor,1 Column,"range [0, 50]",years_experience,PASS,0,25,0.0,,
+dim_advisor,1 Column,"range [1, 1000]",aum_target_mm,PASS,0,25,0.0,,
+dim_advisor,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,25,0.0,,
+dim_benchmark,1 Column,key uniqueness,benchmark_id,PASS,0,8,0.0,,
+dim_benchmark,1 Column,type = integer,benchmark_id,PASS,0,8,0.0,,
+dim_benchmark,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,8,0.0,,
+dim_client,1 Column,key uniqueness,client_id,PASS,0,2525,0.0,,
+dim_client,1 Column,type = integer,client_id,PASS,0,2525,0.0,,
+dim_client,1 Column,type = integer,age,PASS,0,2525,0.0,,
+dim_client,1 Column,type = decimal,initial_aum,PASS,0,2525,0.0,,
+dim_client,1 Column,type = date,client_since,PASS,0,2525,0.0,,
+dim_client,1 Column,type = integer,advisor_id,PASS,0,2525,0.0,,
+dim_client,1 Column,type = boolean,is_active,PASS,0,2525,0.0,,
+dim_client,1 Column,allowed values,risk_profile,PASS,0,2525,0.0,,
+dim_client,1 Column,allowed values,client_tier,PASS,0,2525,0.0,,
+dim_client,1 Column,allowed values,primary_account_type,PASS,0,2525,0.0,,
+dim_client,1 Column,"range [18, 110]",age,PASS,0,2525,0.0,,
+dim_client,1 Column,"range [0.01, None]",initial_aum,PASS,0,2525,0.0,,
+dim_client,1 Column,pattern \d{5},zip_code,PASS,0,2525,0.0,,
+dim_client,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,2525,0.0,,
+dim_client,2 Single-table,client_tier matches initial_aum band (<500K / <5M / 5M+),client_tier,PASS,0,2525,0.0,,
+dim_client,3 Referential,advisor_id -> dim_advisor.advisor_id,advisor_id,PASS,0,2525,0.0,,0 distinct orphan keys; 0 blank keys
+dim_client,4 Cross-table,risk_profile -> benchmark mapping (see note),risk_profile,PASS,0,2525,0.0,,"{'1': {'(blank)': 0, 'Aggressive': 242, 'Balanced': 0, 'Conservative': 0, 'Moderately Aggressive': 459, 'Moderately Conservative': 0}, '3': {'(blank)': 75, 'Aggressive': 0, 'Balanced': 757, 'Conservat"
+dim_date,1 Column,key uniqueness,date_id,PASS,0,1827,0.0,,
+dim_date,1 Column,key uniqueness,date,PASS,0,1827,0.0,,
+dim_date,1 Column,type = integer,date_id,PASS,0,1827,0.0,,
+dim_date,1 Column,type = date,date,PASS,0,1827,0.0,,
+dim_date,1 Column,type = integer,year,PASS,0,1827,0.0,,
+dim_date,1 Column,type = integer,quarter,PASS,0,1827,0.0,,
+dim_date,1 Column,type = integer,month,PASS,0,1827,0.0,,
+dim_date,1 Column,type = integer,week_of_year,PASS,0,1827,0.0,,
+dim_date,1 Column,allowed values,is_month_end,PASS,0,1827,0.0,,
+dim_date,1 Column,allowed values,is_quarter_end,PASS,0,1827,0.0,,
+dim_date,1 Column,allowed values,is_year_end,PASS,0,1827,0.0,,
+dim_date,1 Column,allowed values,is_trading_day,PASS,0,1827,0.0,,
+dim_date,1 Column,"range [2020, 2024]",year,PASS,0,1827,0.0,,
+dim_date,1 Column,"range [1, 4]",quarter,PASS,0,1827,0.0,,
+dim_date,1 Column,"range [1, 12]",month,PASS,0,1827,0.0,,
+dim_date,1 Column,"range [1, 53]",week_of_year,PASS,0,1827,0.0,,
+dim_date,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,year,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,month,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,quarter,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,month_name,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,day_of_week,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,is_month_end,PASS,0,1827,0.0,,
+dim_date,2 Single-table,derived column matches date,is_trading_day,PASS,0,1827,0.0,,
+dim_date,2 Single-table,calendar has no gaps,date,PASS,0,1827,0.0,,
+dim_security,1 Column,key uniqueness,security_id,PASS,0,500,0.0,,
+dim_security,1 Column,key uniqueness,ticker,PASS,0,500,0.0,,
+dim_security,1 Column,type = integer,security_id,PASS,0,500,0.0,,
+dim_security,1 Column,type = integer,benchmark_id,PASS,0,500,0.0,,
+dim_security,1 Column,type = boolean,is_etf,PASS,0,500,0.0,,
+dim_security,1 Column,type = decimal,expense_ratio_bps,PASS,0,500,0.0,,
+dim_security,1 Column,allowed values,asset_class,PASS,0,500,0.0,,
+dim_security,1 Column,"range [0, 300]",expense_ratio_bps,PASS,0,500,0.0,,
+dim_security,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,500,0.0,,
+dim_security,2 Single-table,ETF has no sector / stock has sector,sector,PASS,0,500,0.0,,
+dim_security,2 Single-table,ETF has expense ratio / stock has none,expense_ratio_bps,PASS,0,500,0.0,,
+dim_security,3 Referential,benchmark_id -> dim_benchmark.benchmark_id,benchmark_id,PASS,0,500,0.0,,0 distinct orphan keys; 0 blank keys
+fact_fees,1 Column,key uniqueness,fee_id,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = integer,fee_id,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = integer,client_id,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = integer,advisor_id,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = date,fee_date,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = decimal,aum_basis,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = decimal,bps_charged,PASS,0,122197,0.0,,
+fact_fees,1 Column,type = decimal,amount,PASS,0,122197,0.0,,
+fact_fees,1 Column,allowed values,fee_type,PASS,0,122197,0.0,,
+fact_fees,1 Column,"range [0.01, None]",aum_basis,PASS,0,122197,0.0,,
+fact_fees,1 Column,"range [0, None]",amount,PASS,0,122197,0.0,,
+fact_fees,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,122197,0.0,,
+fact_fees,2 Single-table,"duplicate grain ['client_id', 'fee_date']","client_id,fee_date",PASS,0,122197,0.0,,
+fact_fees,2 Single-table,amount = aum_basis x bps / 10000 / 12,amount,PASS,0,122197,0.0,,
+fact_fees,3 Referential,client_id -> dim_client.client_id,client_id,PASS,0,122197,0.0,,0 distinct orphan keys; 0 blank keys
+fact_fees,3 Referential,advisor_id -> dim_advisor.advisor_id,advisor_id,PASS,0,122197,0.0,,0 distinct orphan keys; 0 blank keys
+fact_fees,3 Referential,fee_date -> dim_date.date,fee_date,PASS,0,122197,0.0,,0 distinct orphan keys; 0 blank keys
+fact_fees,4 Cross-table,advisor_id = client's advisor in dim_client,advisor_id,PASS,0,122197,0.0,,
+fact_fees,4 Cross-table,"fee has matching snapshot (client, month)",fee_date,PASS,0,122197,0.0,,
+fact_fees,4 Cross-table,aum_basis = snapshot aum,aum_basis,PASS,0,122197,0.0,,
+fact_portfolio_snapshot,1 Column,key uniqueness,snapshot_id,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = integer,snapshot_id,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = integer,client_id,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = integer,advisor_id,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = integer,benchmark_id,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = date,snapshot_date,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = integer,year,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = integer,month,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = decimal,aum,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = decimal,benchmark_return_ytd,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = decimal,active_alpha_ytd,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,type = decimal,cash_pct,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,allowed values,account_type,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,"range [-1, 1]",benchmark_return_ytd,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,"range [0, 1]",cash_pct,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,1 Column,"range [1, 12]",month,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,2 Single-table,"duplicate grain ['client_id', 'snapshot_date']","client_id,snapshot_date",PASS,0,129547,0.0,,
+fact_portfolio_snapshot,2 Single-table,active_alpha = return - benchmark_return (after % -> fraction),active_alpha_ytd,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,2 Single-table,year/month match snapshot_date,"year,month",PASS,0,129547,0.0,,
+fact_portfolio_snapshot,3 Referential,client_id -> dim_client.client_id,client_id,PASS,0,129547,0.0,,0 distinct orphan keys; 0 blank keys
+fact_portfolio_snapshot,3 Referential,advisor_id -> dim_advisor.advisor_id,advisor_id,PASS,0,129547,0.0,,0 distinct orphan keys; 0 blank keys
+fact_portfolio_snapshot,3 Referential,benchmark_id -> dim_benchmark.benchmark_id,benchmark_id,PASS,0,129547,0.0,,0 distinct orphan keys; 0 blank keys
+fact_portfolio_snapshot,3 Referential,snapshot_date -> dim_date.date,snapshot_date,PASS,0,129547,0.0,,0 distinct orphan keys; 0 blank keys
+fact_portfolio_snapshot,4 Cross-table,advisor_id = client's advisor in dim_client,advisor_id,PASS,0,129547,0.0,,
+fact_portfolio_snapshot,4 Cross-table,account_type = dim_client.primary_account_type,account_type,PASS,0,129547,0.0,,
+fact_transactions,1 Column,key uniqueness,txn_id,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = integer,txn_id,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = integer,client_id,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = integer,advisor_id,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = date,txn_date,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = decimal,shares,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = decimal,price,PASS,0,298772,0.0,,
+fact_transactions,1 Column,type = decimal,amount,PASS,0,298772,0.0,,
+fact_transactions,1 Column,allowed values,txn_type,PASS,0,298772,0.0,,
+fact_transactions,1 Column,"range [0.01, None]",price,PASS,0,298772,0.0,,
+fact_transactions,1 Column,"range [0.01, None]",amount,PASS,0,298772,0.0,,
+fact_transactions,2 Single-table,exact duplicate rows (ignoring PK),all,PASS,0,298772,0.0,,
+fact_transactions,2 Single-table,"Buy/Sell/Dividend missing security, shares or price","security_id,shares,price",PASS,0,298772,0.0,,
+fact_transactions,2 Single-table,amount = |shares| x price (within 1%),amount,PASS,0,298772,0.0,,
+fact_transactions,3 Referential,advisor_id -> dim_advisor.advisor_id,advisor_id,PASS,0,298772,0.0,,0 distinct orphan keys; 0 blank keys
+fact_transactions,3 Referential,security_id -> dim_security.security_id after removing '.0',security_id,PASS,0,197175,0.0,,0 distinct orphan keys remain after format fix
+fact_transactions,3 Referential,txn_date -> dim_date.date,txn_date,PASS,0,298772,0.0,,0 distinct orphan keys; 0 blank keys
+fact_transactions,4 Cross-table,advisor_id = client's advisor in dim_client,advisor_id,PASS,0,298772,0.0,,
+fact_transactions,4 Cross-table,txn_date >= client_since,txn_date,PASS,0,298772,0.0,,
