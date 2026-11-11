@@ -23,6 +23,7 @@ hw06/
     ├── model_metadata.md             INFO.VIEW.TABLES / COLUMNS / RELATIONSHIPS output
     ├── dax_session.md                Part D prompt + Claude's full response
     ├── verification.md               Part D verification
+    ├── claude_code_review.md         raw Claude Code review of 01_reconcile_measures.py
     └── verification_notes.md         working notes (raw test-query output, review decisions)
 ```
 
@@ -60,11 +61,12 @@ The largest difference is about 3e-5 dollars on currency measures and about 4e-1
 | Export query failed with "The syntax for 'Rows' is incorrect" | Power BI (DAX query) | `ROWS` is a reserved word. Renamed the variable to `RowList`. |
 | `year` kept being summed in the table visual ("Sum of year") | Power BI (model) | Set `dim_date[year]` → Column tools → Summarization → **Don't summarize** |
 | Card visuals rendered blank in Apporto's Power BI build | Power BI (environment) | Built the cards in Power BI Desktop on my own laptop. The measures are unchanged. |
+| On the laptop, the tier table was empty and a new card showed $10bn | Power BI (report) | A year-table row I had clicked was saved as a cross-filter, which limited the page to one year. Clicking the row again cleared it, and every visual returned to the 2024 values. |
 | Assumed snapshots were month-end | Assumption | DAX test query and pandas both show snapshots are dated the **1st of each month** (last = 2024-12-01). `LASTNONBLANK` doesn't depend on the day, so no measure changed. |
 
 ## Claude Code review of `01_reconcile_measures.py`
 
-Claude Code read the script, compared it to the DAX in `claude/`, and profiled the CSVs. It found **no bugs that change any of the 89 results**. What it flagged and what I did:
+Claude Code read the script, compared it to the DAX in `claude/`, and profiled the CSVs. It found **no bugs that change any of the 89 results**. The full output is in `claude/claude_code_review.md`. What it flagged and what I did:
 
 | # | Severity | Finding | What I did |
 |---|---|---|---|
@@ -86,7 +88,7 @@ After the fixes, the script was re-run: still 89/89.
 
 `powerbi/hw06.pbix` is about 21 MB, under GitHub's 100 MB limit. It's saved with the **Measures** page open, which contains:
 
-- **Cards:** Ending AUM, Ending Clients, Avg AUM per Client, Top 10 Client Share
+- **Cards:** Ending AUM ($13bn), Ending Clients (2K), Avg AUM per Client ($5M), Top 10 Client Share (6.16%)
 - **Table by year:** Ending AUM, AUM YoY %, Avg Monthly AUM, Fee Yield (bps), Organic Growth Rate, AUM-Weighted Alpha, Alpha Signal
 - **Table by client tier**, with a visual-level filter `year = 2024`: Ending AUM, Avg AUM per Client, AUM YoY %, Fee Yield (bps), Organic Growth Rate, AUM-Weighted Alpha, Alpha Signal, Top 10 Client Share
 
