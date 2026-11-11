@@ -1,0 +1,89 @@
+====================================================================== 
+(a) Ending AUM vs SUMX over clients (no filters)
+======================================================================
+Last snapshot date:               2024-12-01
+Ending AUM:                       $12,729,572,078.86
+SUMX (each client's own last):    $13,149,297,713.80
+Difference:                       $419,725,634.94
+Clients absent from last snapshot: 175
+Their last balances (sum):        $419,725,634.94
+Their last snapshot dates range:  2022-12-01 to 2023-11-01
+Departed clients by tier:
+              count              sum
+client_tier                        
+HNW             50 137,070,679.8000
+Retail         116  30,516,510.0200
+UHNW             9 252,138,445.1200
+
+====================================================================== 
+(b) 2024 Fee Yield vs Effective Fee Rate
+======================================================================
+Total fees 2024:                  $48,714,005.93
+Sum of snapshot aum 2024:         $135,459,843,783.73
+Sum of fee aum_basis 2024:        $128,385,303,527.10
+Fee Yield (bps, snapshot denom): 43.15
+Effective Fee Rate (bps, aum_basis denom): 45.53
+Fee types: {'Management': 15320, 'Advisory': 6909, 'Custodial': 2269, 'Performance': 1718}
+
+Snapshot client-months 2024:      27900
+  with a fee record:              26216
+  WITHOUT a fee record:           1684 (6.0% of rows, 5.2% of AUM)
+  distinct clients never billed in 2024: 0
+Fee yield on billed rows only:    45.53 bps
+aum_basis / snapshot aum on billed rows: 1.0000
+Unbilled rows by tier:
+              count                sum
+client_tier                          
+HNW            472 1,506,187,268.1400
+Retail        1054   334,025,619.8200
+UHNW           158 5,234,327,368.6700
+Unbilled rows by month:
+                count                sum
+snapshot_date                          
+1                154 1,075,741,611.6000
+2                172   890,528,588.6000
+3                147   679,619,724.7500
+4                155   751,261,963.7100
+5                151   467,319,282.4400
+6                162   784,528,292.1100
+7                150   390,473,281.3100
+8                131   475,962,620.5100
+9                119   501,867,529.8600
+10               138   504,502,977.8700
+11               114   337,076,356.4200
+12                91   215,658,027.4500
+Fee rows with no matching snapshot: 0
+
+====================================================================== 
+(c) AUM-Weighted Alpha at the last 2024 snapshot
+======================================================================
+Snapshot date: 2024-12-01 | rows: 2325 | suspect rows: 148 (0.1% of AUM)
+Weighted alpha, suspects EXCLUDED (measure): 1.4480%
+Simple mean alpha, same rows:                0.8788%
+Weighted alpha, suspects INCLUDED:           1.6678%
+Simple mean alpha, suspects included:        15.5624%
+Suspect rows: mean alpha 231.5509%, min -120.8978%, max 7133.7772%
+WRONG: weighted alpha over ALL 2024 months:  0.3225%
+Alpha (YTD) by month, weighted, suspects excluded:
+snapshot_date
+1     -0.0092%
+2     -0.0204%
+3     -0.0167%
+4      0.0097%
+5      0.0349%
+6      0.0271%
+7      0.0863%
+8      0.2846%
+9      0.3338%
+10     0.5723%
+11     0.8280%
+12     1.4480%
+
+====================================================================== 
+(d) Organic Growth vs AUM YoY by tier, 2024
+======================================================================
+                      end_2023           end_2024         deposits      withdrawals  clients_2023  clients_2024       net_flows   yoy_%  organic_%  non_flow_%  share_of_firm_net_flows_%
+client_tier                                                                                                                                                                              
+HNW         2,130,154,150.4200 2,548,521,154.3300 120,012,105.0300  94,784,698.7700           687           687 25,227,406.2600 19.6402     1.1843     18.4559                    32.5460
+Retail        447,795,648.6700   533,452,497.8900 245,282,579.8500 201,098,532.2400          1394          1394 44,184,047.6100 19.1286     9.8670      9.2615                    57.0021
+UHNW        8,067,021,937.9100 9,647,598,426.6400  45,251,363.7900  37,149,762.4000           244           244  8,101,601.3900 19.5931     0.1004     19.4926                    10.4519
